@@ -61,7 +61,7 @@ class SheetMusicEditor(QDialog):
         #self.pushButton_3.clicked.connect(self.make_big)
         #self.pushButton_4.clicked.connect(self.make_small)
         self.save_button.clicked.connect(sheet.saveFile)
-        self.openFile_button.clicked.connect(sheet.openFile)
+        self.openFile_button.clicked.connect(lambda: sheet.openFile(self))
         self.new_file_button.clicked.connect(sheet.create_new_file)
         self.refresh_button.clicked.connect(sheet.refresh_sheet)
 
@@ -91,3 +91,4 @@ if __name__ == '__main__':
     editor = SheetMusicEditor()
     editor.show()
     sys.exit(app.exec())
+

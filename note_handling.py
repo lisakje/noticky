@@ -137,9 +137,9 @@ class Sheet():
 
         self.graphicsView.addItem(pdf_file)
 
-    def openFile(self):
+    def openFile(self, parent):
         # Get filename from user
-        filename, _ = QFileDialog.getOpenFileName(self, "Open Sheet Music", "", "Lilypond Files (*.ly)")
+        filename, _ = QFileDialog.getOpenFileName(parent, "Open Sheet Music", "", "Lilypond Files (*.ly)")
         if not filename:
             return
 
@@ -148,11 +148,11 @@ class Sheet():
             lilypond_text = f.read()
 
         # Parse LilyPond file - tohle je divný
-        lilypond_file = LilyPondFile() #definuje datovej typ
-        lilypond_file = parse.parse(lilypond_text)
+        # lilypond_file = LilyPondFile() #definuje datovej typ
+        # lilypond_file = parse.parse(lilypond_text)
         #parse.show(lilypond_file)
         #self.musicEdit.
 
-        self.graphicsView.addItem(lilypond_file)
+        parent.musicEdit.setPlainText(lilypond_text)
         # Set widget values
         #self.musicEdit.setPlainText(lilypond_text.items()[0].to_lilypond())
