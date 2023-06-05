@@ -8,6 +8,9 @@ from abjad.parsers import parse
 
 
 class Sheet():
+    def __init__(self, sheet_music_editor):
+        self.sme = sheet_music_editor
+
     def transpose_up(self):
             with open("new_file.ly", "r") as f:
                 code = f.read
@@ -112,8 +115,8 @@ class Sheet():
 
     def saveFile(self):
         #oficiálně funguje
-        current_text = self.musicEdit.toPlainText()
-        filename, _ = QFileDialog.getSaveFileName(self, "Save Sheet Music", "", "Lilypond Files (*.ly)")
+        current_text = self.sme.musicEdit.toPlainText()
+        filename, _ = QFileDialog.getSaveFileName(self.sme, "Save Sheet Music", "", "Lilypond Files (*.ly)")
         if not filename:
             return    
         #když existuje stejný jméno, tak to zakřičí  
@@ -124,8 +127,8 @@ class Sheet():
     def refresh_sheet(self):
         #tohle musí jít udělat líp než jenom paste saveFile - probrat s Borkem
         #oficiálně funguje
-        current_text = self.musicEdit.toPlainText()
-        filename, _ = QFileDialog.getSaveFileName(self, "Save Sheet Music", "", "Lilypond Files (*.ly)")
+        current_text = self.sme.musicEdit.toPlainText()
+        filename, _ = QFileDialog.getSaveFileName(self.sme, "Save Sheet Music", "", "Lilypond Files (*.ly)")
         if not filename:
             return    
         #když existuje stejný jméno, tak to zakřičí  
@@ -137,9 +140,9 @@ class Sheet():
 
         self.graphicsView.addItem(pdf_file)
 
-    def openFile(self, parent):
+    def openFile(self):
         # Get filename from user
-        filename, _ = QFileDialog.getOpenFileName(parent, "Open Sheet Music", "", "Lilypond Files (*.ly)")
+        filename, _ = QFileDialog.getOpenFileName(self.sme, "Open Sheet Music", "", "Lilypond Files (*.ly)")
         if not filename:
             return
 
@@ -153,6 +156,6 @@ class Sheet():
         #parse.show(lilypond_file)
         #self.musicEdit.
 
-        parent.musicEdit.setPlainText(lilypond_text)
+        self.sme.musicEdit.setPlainText(lilypond_text)
         # Set widget values
         #self.musicEdit.setPlainText(lilypond_text.items()[0].to_lilypond())

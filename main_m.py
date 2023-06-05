@@ -38,7 +38,7 @@ class SheetMusicEditor(QDialog):
                 self.note_added.emit(note.to_lilypond() + "")
 
     def __init__(self):
-        sheet = Sheet()
+        sheet = Sheet(sheet_music_editor=self)
         super(SheetMusicEditor, self).__init__()
         #uic.loadUi("qtdesigner_zkouska.ui", self)
         uic.loadUi(os.path.normpath(os.path.join(__file__, "..", "main_ui.ui")), self)
@@ -61,7 +61,7 @@ class SheetMusicEditor(QDialog):
         #self.pushButton_3.clicked.connect(self.make_big)
         #self.pushButton_4.clicked.connect(self.make_small)
         self.save_button.clicked.connect(sheet.saveFile)
-        self.openFile_button.clicked.connect(lambda: sheet.openFile(self))
+        self.openFile_button.clicked.connect(sheet.openFile)
         self.new_file_button.clicked.connect(sheet.create_new_file)
         self.refresh_button.clicked.connect(sheet.refresh_sheet)
 
