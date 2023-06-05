@@ -9,18 +9,10 @@ import keyboard
 from ly import *
 import ly.document
 import ly.music
-#import ly.cli.command
-#import ly.cli.main
-from ly.pitch import transpose
-from ly.pitch.transpose import ModalTransposer
 from abjad import LilyPondFile, Note
-from abjad.parsers import parse
 from abjad.pitch import NamedPitch
-import re
-import subprocess
 
-from note_handling import *
-from file_handling import *
+from note_handling import Sheet
 
 class SheetMusicEditor(QDialog):
     class KeyboardListener(QThread):
@@ -46,39 +38,40 @@ class SheetMusicEditor(QDialog):
                 self.note_added.emit(note.to_lilypond() + "")
 
     def __init__(self):
+        sheet = Sheet()
         super(SheetMusicEditor, self).__init__()
         #uic.loadUi("qtdesigner_zkouska.ui", self)
-        uic.loadUi(os.path.normpath(os.path.join(__file__, "..", "qtdesigner_zkouska.ui")), self)
+        uic.loadUi(os.path.normpath(os.path.join(__file__, "..", "main_ui.ui")), self)
 
         self.keyboard_listener = self.KeyboardListener()
-        self.keyboard_listener.note_added.connect(self.add_note_to_file)
+        self.keyboard_listener.note_added.connect(sheet.add_note_to_file)
         self.keyboard_listener.start()
 
         self.show()
         
-        self.pushButton.clicked.connect(self.transpose_up)
-        self.pushButton_2.clicked.connect(self.transpose_down)
-        self.krizek_button.clicked.connect(self.add_krizek_to_file)
-        self.becko_button.clicked.connect(self.add_becko_to_file)
+        self.pushButton.clicked.connect(sheet.transpose_up)
+        self.pushButton_2.clicked.connect(sheet.transpose_down)
+        self.krizek_button.clicked.connect(sheet.add_krizek_to_file)
+        self.becko_button.clicked.connect(sheet.add_becko_to_file)
         self.treble_button.setChecked(True)
-        self.treble_button.toggled.connect(self.clef_changed)
-        self.alto_button.toggled.connect(self.clef_changed)
-        self.bass_button.toggled.connect(self.clef_changed)
+        self.treble_button.toggled.connect(sheet.clef_changed)
+        self.alto_button.toggled.connect(sheet.clef_changed)
+        self.bass_button.toggled.connect(sheet.clef_changed)
 
         #self.pushButton_3.clicked.connect(self.make_big)
         #self.pushButton_4.clicked.connect(self.make_small)
-        self.save_button.clicked.connect(self.saveFile)
-        self.openFile_button.clicked.connect(self.openFile)
-        self.new_file_button.clicked.connect(self.create_new_file)
-        self.refresh_button.clicked.connect(self.refresh_sheet)
+        self.save_button.clicked.connect(sheet.saveFile)
+        self.openFile_button.clicked.connect(sheet.openFile)
+        self.new_file_button.clicked.connect(sheet.create_new_file)
+        self.refresh_button.clicked.connect(sheet.refresh_sheet)
 
-        self.c_button.clicked.connect(lambda: self.add_note_to_file("c'"))
-        self.d_button.clicked.connect(lambda: self.add_note_to_file("d'"))
-        self.e_button.clicked.connect(lambda: self.add_note_to_file("e'"))
-        self.f_button.clicked.connect(lambda: self.add_note_to_file("f'"))
-        self.g_button.clicked.connect(lambda: self.add_note_to_file("g'"))
-        self.a_button.clicked.connect(lambda: self.add_note_to_file("a'"))
-        self.b_button.clicked.connect(lambda: self.add_note_to_file("b'"))
+        self.c_button.clicked.connect(lambda: sheet.add_note_to_file("c'"))
+        self.d_button.clicked.connect(lambda: sheet.add_note_to_file("d'"))
+        self.e_button.clicked.connect(lambda: sheet.add_note_to_file("e'"))
+        self.f_button.clicked.connect(lambda: sheet.add_note_to_file("f'"))
+        self.g_button.clicked.connect(lambda: sheet.add_note_to_file("g'"))
+        self.a_button.clicked.connect(lambda: sheet.add_note_to_file("a'"))
+        self.b_button.clicked.connect(lambda: sheet.add_note_to_file("b'"))
 
         self.bpm_slider = QSlider(Qt.Horizontal)
         self.bpm_slider.setMinimum(1)
@@ -87,11 +80,11 @@ class SheetMusicEditor(QDialog):
         self.bpm_slider.setValue(120)
         self.bpm_slider.setTickInterval(30)
         self.bpm_slider.setTickPosition(QSlider.TicksBelow)
-        self.bpm_slider.valueChanged.connect(self.bpm_changed)
+        self.bpm_slider.valueChanged.connect(sheet.bpm_changed)
         #self.horizontalLayout_2.addWidget(self.bpm_slider)
 
         #self.actionClose.triggered.connect(exit)
-    
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
