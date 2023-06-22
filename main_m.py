@@ -40,7 +40,6 @@ class SheetMusicEditor(QDialog):
     def __init__(self):
         sheet = Sheet(sheet_music_editor=self)
         super(SheetMusicEditor, self).__init__()
-        #uic.loadUi("qtdesigner_zkouska.ui", self)
         uic.loadUi(os.path.normpath(os.path.join(__file__, "..", "main_ui.ui")), self)
 
         self.keyboard_listener = self.KeyboardListener()
@@ -81,7 +80,6 @@ class SheetMusicEditor(QDialog):
         self.bpm_slider.setTickInterval(30)
         self.bpm_slider.setTickPosition(QSlider.TicksBelow)
         self.bpm_slider.valueChanged.connect(sheet.bpm_changed)
-        #self.horizontalLayout_2.addWidget(self.bpm_slider)
 
         #self.actionClose.triggered.connect(exit)
 
