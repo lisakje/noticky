@@ -3,6 +3,7 @@ from ly.pitch.transpose import ModalTransposer
 import re
 from PyQt5.QtWidgets import QFileDialog
 import subprocess
+import fitz
 #from abjad import LilyPondFile
 #from abjad.parsers import parse
 
@@ -28,6 +29,7 @@ class Sheet():
 
 
     def add_becko_to_file(self):
+        # pridava becko, ale až na konec textu
         with open("new_file.ly", "r") as f:
             code = f.read()
         
@@ -93,21 +95,6 @@ class Sheet():
         with open("new_file.ly", "w") as f:
             f.write(new_text)
 
-    def saveFile(self):
-        #oficiálně funguje
-        current_text = self.sme.musicEdit.toPlainText()
-
-        if self.filename is None:
-            self.filename, _ = QFileDialog.getSaveFileName(self.sme, "Save Sheet Music", "", "Lilypond Files (*.ly)")
-        else:
-            pass
-            #když existuje stejný jméno, tak to zakřičí  
-        if not self.filename:
-            return    
-
-        with open(self.filename, 'w') as f:
-            f.write(current_text)
-
     def create_new_file(self):
         # oficiálně funguje
         with open("new_file.ly", "w") as f:
@@ -127,15 +114,36 @@ class Sheet():
 
         self.sme.musicEdit.setPlainText(lilypond_text)
 
+    def saveFile(self):
+            #oficiálně funguje na nový i existující věci
+            current_text = self.sme.musicEdit.toPlainText()
+
+            if self.filename is None:
+                self.filename, _ = QFileDialog.getSaveFileName(self.sme, "Save Sheet Music", "", "Lilypond Files (*.ly)")
+                #TO-DO když existuje stejný jméno, tak to zakřičí
+            if not self.filename:
+                return    
+
+            with open(self.filename, 'w') as f:
+                f.write(current_text)
+
     def refresh_sheet(self):
+        #snad napsané skoro funkčně, zeptat se požára
         self.saveFile()
-        # protože filename existuje, tak to prostě nic nedělá
         
-        png_file = subprocess.check_output([f"{self.filename} --png"])
+        subprocess.run(["cd ~/noticky/aut"])
+        subprocess.run([f"lilypond {self.filename}"])
+        #TODO s borkem přepsat tak, aby filename bylo actually jenom filename (edit: nejsem si tak jistá, že to actually vadí)
 
-        # myslím, že jí chybí dání té instrukce "teď tu věc pojmenuj takhle (v našem připadě "nazev.ly" --> "nazev.png")"
+        doc = fitz.open(self.filename)
+        png_page_list = []
+        for i, page in enumerate(doc):
+            pix = page.get_pixmap()  # render page to an image
+            for i in doc:
+                another_page = pix.save(f"{self.filename}_page_{i}.png")
+                png_page_list.append(another_page)
 
-        self.sme.graphicsView.addItem(png_file)
+        self.sme.graphicsView.addItem(png_page_list)
 
     def openFile(self):
         #tohle oficiálně funguje - pdfko ale nezobrazí - to je všechno podle plánu
@@ -147,10 +155,6 @@ class Sheet():
         # Load LilyPond file
         with open(self.filename, 'r') as f:
             lilypond_text = f.read()
-        
-        #lilypond_file = LilyPondFile()
-        #lilypond_file = parse.parse(lilypond_text)
-        #parse.show(lilypond_file)
 
         self.sme.musicEdit.setPlainText(lilypond_text)
         # Set widget values

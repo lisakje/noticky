@@ -7,4 +7,4 @@
 \score {
 	\new Staff { }
 	\layout { }
-}
+c"}
