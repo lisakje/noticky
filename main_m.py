@@ -14,6 +14,11 @@ from abjad.pitch import NamedPitch
 
 from note_handling import Sheet
 
+class ojojError(QWidget):
+    def __init__(self):
+        QWidget.__init__(self)
+        uic.loadUi(os.path.normpath(os.path.join(__file__, "..", "ojoj.ui")), self)
+
 class SheetMusicEditor(QDialog):
     class KeyboardListener(QThread):
         note_added = pyqtSignal(str)
@@ -57,12 +62,18 @@ class SheetMusicEditor(QDialog):
         self.alto_button.toggled.connect(sheet.clef_changed)
         self.bass_button.toggled.connect(sheet.clef_changed)
 
+        #self.confirmTitle.clicked.connect(sheet.title_changed)
+        #buhví proč píše, že nemá confirmTitle atribut, ale to je STRAŠNĚ sus
+
         #self.pushButton_3.clicked.connect(self.make_big)
-        #self.pushButton_4.clicked.connect(self.make_small)
+        #self.pushButton_4.clicked.connect(self.make_small) - oddalování not
         self.save_button.clicked.connect(sheet.saveFile)
         self.openFile_button.clicked.connect(sheet.openFile)
         self.new_file_button.clicked.connect(sheet.create_new_file)
         self.refresh_button.clicked.connect(sheet.refresh_sheet)
+
+        #self.close_button.clicked.connect(sheet.closeEvent)
+        # TODO tlačítko co bude existovat - možná je i3? vyšetřit
 
         self.c_button.clicked.connect(lambda: sheet.add_note_to_file("c'"))
         self.d_button.clicked.connect(lambda: sheet.add_note_to_file("d'"))
@@ -89,4 +100,3 @@ if __name__ == '__main__':
     editor = SheetMusicEditor()
     editor.show()
     sys.exit(app.exec())
-

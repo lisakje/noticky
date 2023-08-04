@@ -1,3 +1,4 @@
+import sys
 from ly.pitch import transpose
 from ly.pitch.transpose import ModalTransposer
 import re
@@ -14,13 +15,13 @@ class Sheet():
         self.filename = None
 
     def transpose_up(self):
-            with open("new_file.ly", "r") as f:
+            with open(self.filename, "r") as f:
                 code = f.read
                 #transponitko = ModalTransposer(7, 0)
                 tonina = ModalTransposer.getKeyIndex(f)
                 transpose(tonina)
             
-            with open("new_file.ly", "r") as f:
+            with open(self.filename, "r") as f:
                 f.write(code)
                 #self.pitch = transpose.transpose_pitch(self.pitch, "1")
 
@@ -30,14 +31,13 @@ class Sheet():
 
     def add_becko_to_file(self):
         # pridava becko, ale až na konec textu
-        with open("new_file.ly", "r") as f:
+        with open(self.filename, "r") as f:
             code = f.read()
         
-        # Get current text in music editor
         current_text = self.sme.musicEdit.toPlainText()
 
         # Add znaminko to music editor
-        new_text = current_text.rstrip() + "{ \\flat }" + " "
+        new_text = current_text.rstrip() + "es" + " "
 
         # Set new text in music editor
         self.sme.musicEdit.setPlainText(new_text)
@@ -47,7 +47,7 @@ class Sheet():
         current_text = self.sme.musicEdit.toPlainText()
 
         # Add znaminko to music editor
-        new_text = current_text.rstrip() + "{ \sharp }" + " "
+        new_text = current_text.rstrip() + "is" + " "
 
         # Set new text in music editor
         self.sme.musicEdit.setPlainText(new_text)
@@ -55,7 +55,7 @@ class Sheet():
 
     def bpm_changed(slider_val, self):
         bpm = slider_val
-        with open("new_file.ly", "r+") as file:
+        with open(self.filename, "r+") as file:
             data = file.read()
             file.seek(0)
             file.truncate()
@@ -72,31 +72,44 @@ class Sheet():
         else:
             clef = 'treble'
         
-        with open("new_file.ly", "r") as f:
+        with open(self.filename, "r") as f:
             code = f.read()
         
             # Replace the clef in the LilyPond code
         code = re.sub(r'\\clef\s+\w+', f'\\clef {clef}', code)
 
         # Write the modified LilyPond code to a new file
-        with open("new_file.ly", "w") as f:
+        with open(self.filename, "w") as f:
             f.write(code)
 
 
     def add_note_to_file(self, note):
-        with open("new_file.ly", "r") as f:
-            code = f.read()
-        # Get current text in music editor
+        current_text = self.sme.musicEdit.toPlainText()
 
         # Add note to music editor - v pohodě, protože value tý noty potom dostane v argumetu
-        new_text = code + note + " "
+        new_text = current_text.rstrip() + " " + note
 
-        # Set new text in music editor
-        with open("new_file.ly", "w") as f:
+        self.sme.musicEdit.setPlainText(new_text)
+
+
+    def title_changed(self):
+        #tady to prijme ten vstup
+        new_title = self.titleName.textChanged(self)
+
+        with open(self.filename, "r") as f:
+            code = f.read()
+
+            clear_code = code.rstrip()
+            
+            position = clear_code.rfind("title = ") #nevim jestli takhle outputuje?
+            new_text = clear_code[:position] + new_title + clear_code[position + 1:]
+        
+        with open(self.filename, "w") as f:
             f.write(new_text)
 
     def create_new_file(self):
         # oficiálně funguje
+
         with open("new_file.ly", "w") as f:
             f.write("\\version \"2.18.2\"\n\n")
             #f.write(f"\\clef {self.clef}\n")
@@ -157,5 +170,6 @@ class Sheet():
             lilypond_text = f.read()
 
         self.sme.musicEdit.setPlainText(lilypond_text)
-        # Set widget values
-        #self.sme.musicEdit.setPlainText(lilypond_text.items()[0].to_lilypond())
+
+    def closeEvent(self):
+        sys.exit(0)
