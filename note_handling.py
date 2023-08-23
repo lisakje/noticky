@@ -1,15 +1,11 @@
 import sys
-from ly.pitch import transpose
-from ly.pitch.transpose import ModalTransposer
+#from ly.pitch import transpose
+#from ly.pitch.transpose import ModalTransposer
 import re
 from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsView, QGraphicsPixmapItem
 from PyQt5.QtGui import QImage, QPixmap
 import subprocess
-#from abjad import io
-#from abjad.io import LilyPondIO
 import pathlib
-#from abjad import LilyPondFile
-#from abjad.parsers import parse
 
 
 class Sheet():
@@ -45,11 +41,12 @@ class Sheet():
             self.sme.musicEdit.setPlainText(new_text)"""
 
     def transpose_down(self):
-        self.pitch = transpose.transpose(self.pitch, "-1")
+        pass
+        #self.pitch = transpose.transpose(self.pitch, "-1")
 
 
     def add_becko_to_file(self):
-        # pridava becko, ale až na konec textu
+        # pridava becko, ale až na konec textu - to je v pohode lol
         with open(self.filename, "r") as f:
             code = f.read()
         
@@ -71,22 +68,19 @@ class Sheet():
         
 
     def clef_changed(self):
-        if self.alto_button.isChecked():
-            clef = 'alto'
-        elif self.bass_button.isChecked():
-            clef = 'bass'
-        else:
-            clef = 'treble'
-        
-        with open(self.filename, "r") as f:
-            code = f.read()
-        
-            # Replace the clef in the LilyPond code
-        code = re.sub(r'\\clef\s+\w+', f'\\clef {clef}', code)
+        current_text = self.sme.musicEdit.toPlainText()
 
-        # Write the modified LilyPond code to a new file
-        with open(self.filename, "w") as f:
-            f.write(code)
+        if self.sme.alto_button.isChecked():
+            new_text = current_text.replace("bass", "alto")
+            new_text = current_text.replace("treble", "alto")
+        elif self.sme.bass_button.isChecked():
+            new_text = current_text.replace("treble", "bass")
+            new_text = current_text.replace("alto", "bass")
+        else:
+            new_text = current_text.replace("alto", "treble")
+            new_text = current_text.replace("bass", "treble")
+
+        self.sme.musicEdit.setPlainText(new_text)
 
 
     def add_note_to_file(self, note):
@@ -119,13 +113,12 @@ class Sheet():
 
         with open("new_file.ly", "w") as f:
             f.write("\\version \"2.18.2\"\n\n")
-            #f.write(f"\\clef {self.clef}\n")
             f.write("\\transpose c c {\n")
             f.write("\t\\relative {\n")
             f.write("\t\key c \major\n")
+            f.write("\t\clef treble \n")
             f.write("\t }\n")
             f.write("}\n")
-            #self.pitch = Pitch("c'")
 
         with open("new_file.ly", 'r') as f:
             lilypond_text = f.read()
@@ -146,11 +139,9 @@ class Sheet():
                 f.write(current_text)
 
     def refresh_sheet(self):
-        # nějak funguje??? asi??
+        # nějak funguje??? (magicky)
         self.saveFile()
         
-        # current_dir = subprocess.check_output("pwd")
-        #print(pathlib.Path(__file__))
         pp = pathlib.PurePath(self.filename)
         print(pp.parents[0])
         
