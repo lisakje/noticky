@@ -5,10 +5,9 @@ import re
 from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsView, QGraphicsPixmapItem
 from PyQt5.QtGui import QImage, QPixmap
 import subprocess
-from abjad import io
-from abjad.io import LilyPondIO
+#from abjad import io
+#from abjad.io import LilyPondIO
 import pathlib
-#from pdf2image import convert_from_path
 #from abjad import LilyPondFile
 #from abjad.parsers import parse
 
@@ -19,14 +18,31 @@ class Sheet():
         self.filename = None
 
     def transpose_up(self):
-            with open(self.filename, "r") as f:
-                code = f.read
-                tonina = ModalTransposer.getKeyIndex(code)
-                # operuje s kvintovým kruhem - bacha!
-                new_text = transpose(code, 1)
-                #self.pitch = transpose.transpose_pitch(self.pitch, "1")
+        current_text = self.sme.musicEdit.toPlainText()
+    
+        list_of_toniny = ["c  ", "cis", "d  ", "dis", "e  ", "f  ", "fis", "g  ", "gis", "a  ", "ais", "h  "]    
+        k = False
+        for i in list_of_toniny:
+            if k:
+                current_text[31:33] = i
+                k=False
+                break
+            if current_text[31:33] == i:
+                k = True
+        if k:
+            current_text[31:33] = i
+        current_text[29] = list_of_toniny[i] #puvodni tonina (vzdy c)
+
+        self.sme.musicEdit.setPlainText(current_text)
+
+        """with open(self.filename, "r") as f:
+            code = f.read
+            tonina = ModalTransposer.getKeyIndex(code)
+            # operuje s kvintovým kruhem - bacha!
+            new_text = transpose(code, 1)
+            #self.pitch = transpose.transpose_pitch(self.pitch, "1")
             
-            self.sme.musicEdit.setPlainText(new_text)
+            self.sme.musicEdit.setPlainText(new_text)"""
 
     def transpose_down(self):
         self.pitch = transpose.transpose(self.pitch, "-1")
@@ -78,7 +94,7 @@ class Sheet():
         current_text = self.sme.musicEdit.toPlainText()
 
         # Add note to music editor - v pohodě, protože value tý noty potom dostane v argumetu
-        new_text = current_text[:(-2)] + " " + note + current_text[(-2):]
+        new_text = current_text[:(-4)] + " " + note + current_text[(-4):]
 
         self.sme.musicEdit.setPlainText(new_text)
 
@@ -104,12 +120,10 @@ class Sheet():
         with open("new_file.ly", "w") as f:
             f.write("\\version \"2.18.2\"\n\n")
             #f.write(f"\\clef {self.clef}\n")
-            f.write("\\header {\n")
-            f.write("\ttitle = \"Untitled\"\n")
-            f.write("}\n\n")
-            f.write("\\score {\n")
-            f.write("\t\\new Staff { }\n")
-            f.write("\t\\layout { }\n")
+            f.write("\\transpose c c {\n")
+            f.write("\t\\relative {\n")
+            f.write("\t\key c \major\n")
+            f.write("\t }\n")
             f.write("}\n")
             #self.pitch = Pitch("c'")
 
@@ -132,15 +146,17 @@ class Sheet():
                 f.write(current_text)
 
     def refresh_sheet(self):
-        # nějak funguje???
+        # nějak funguje??? asi??
         self.saveFile()
         
-        #io.spawn_subprocess(["cd home/lida/noticky/aut"])
-        current_dir = subprocess.check_output("pwd")
-        name_of_file = self.filename.replace("/home/lida/noticky/aut/", "") #tohle by chtělo upravit aby to nebylo jen na muj laptop lol
+        # current_dir = subprocess.check_output("pwd")
+        #print(pathlib.Path(__file__))
+        pp = pathlib.PurePath(self.filename)
+        print(pp.parents[0])
+        
+        name_of_file = pathlib.PurePath(self.filename)
 
-        subprocess.run([f"lilypond", "--png", name_of_file], capture_output=False) #vypadá správně syntakticky
-
+        subprocess.run([f"lilypond", "--png", name_of_file], capture_output=False)
         p = pathlib.Path(self.filename)
         png_img = str(p.with_suffix(".png"))
         
