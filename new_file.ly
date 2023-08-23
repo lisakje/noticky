@@ -8,4 +8,3 @@
 	\new Staff { }
 	\layout { }
 }
-c' d' e' 

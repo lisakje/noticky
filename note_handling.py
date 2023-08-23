@@ -2,9 +2,13 @@ import sys
 from ly.pitch import transpose
 from ly.pitch.transpose import ModalTransposer
 import re
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsView, QGraphicsPixmapItem
+from PyQt5.QtGui import QImage, QPixmap
 import subprocess
-import fitz
+from abjad import io
+from abjad.io import LilyPondIO
+import pathlib
+#from pdf2image import convert_from_path
 #from abjad import LilyPondFile
 #from abjad.parsers import parse
 
@@ -17,16 +21,15 @@ class Sheet():
     def transpose_up(self):
             with open(self.filename, "r") as f:
                 code = f.read
-                #transponitko = ModalTransposer(7, 0)
-                tonina = ModalTransposer.getKeyIndex(f)
-                transpose(tonina)
-            
-            with open(self.filename, "r") as f:
-                f.write(code)
+                tonina = ModalTransposer.getKeyIndex(code)
+                # operuje s kvintovým kruhem - bacha!
+                new_text = transpose(code, 1)
                 #self.pitch = transpose.transpose_pitch(self.pitch, "1")
+            
+            self.sme.musicEdit.setPlainText(new_text)
 
     def transpose_down(self):
-        self.pitch = transpose.transpose_pitch(self.pitch, "-1")
+        self.pitch = transpose.transpose(self.pitch, "-1")
 
 
     def add_becko_to_file(self):
@@ -37,31 +40,18 @@ class Sheet():
         current_text = self.sme.musicEdit.toPlainText()
 
         # Add znaminko to music editor
-        new_text = current_text.rstrip() + "es" + " "
+        new_text = current_text[:(-2)] + " " + "es" + current_text[(-2):]
 
         # Set new text in music editor
         self.sme.musicEdit.setPlainText(new_text)
+
 
     def add_krizek_to_file(self):
-        # Get current text in music editor
         current_text = self.sme.musicEdit.toPlainText()
 
-        # Add znaminko to music editor
-        new_text = current_text.rstrip() + "is" + " "
+        new_text = current_text[:(-2)] + " " + "is" + current_text[(-2):]
 
-        # Set new text in music editor
         self.sme.musicEdit.setPlainText(new_text)
-
-
-    def bpm_changed(slider_val, self):
-        bpm = slider_val
-        with open(self.filename, "r+") as file:
-            data = file.read()
-            file.seek(0)
-            file.truncate()
-            parameter = f"\\override Score.MetronomeMark #'stencil = ##f \\override Score.MetronomeMark #'break-visibility = ##(#f #f #f) \\tempo {bpm}"
-            data = re.sub(r'\\override Score\.MetronomeMark #\'stencil = ##f \\override Score\.MetronomeMark #\'break-visibility = ##\(#f #f #f\) \\tempo \d+', parameter, data)
-            file.write(data)
         
 
     def clef_changed(self):
@@ -84,10 +74,11 @@ class Sheet():
 
 
     def add_note_to_file(self, note):
+        #oficiálně funguje
         current_text = self.sme.musicEdit.toPlainText()
 
         # Add note to music editor - v pohodě, protože value tý noty potom dostane v argumetu
-        new_text = current_text.rstrip() + " " + note
+        new_text = current_text[:(-2)] + " " + note + current_text[(-2):]
 
         self.sme.musicEdit.setPlainText(new_text)
 
@@ -141,22 +132,26 @@ class Sheet():
                 f.write(current_text)
 
     def refresh_sheet(self):
-        #snad napsané skoro funkčně, zeptat se požára
+        # nějak funguje???
         self.saveFile()
         
-        subprocess.run(["cd ~/noticky/aut"])
-        subprocess.run([f"lilypond {self.filename}"])
-        #TODO s borkem přepsat tak, aby filename bylo actually jenom filename (edit: nejsem si tak jistá, že to actually vadí)
+        #io.spawn_subprocess(["cd home/lida/noticky/aut"])
+        current_dir = subprocess.check_output("pwd")
+        name_of_file = self.filename.replace("/home/lida/noticky/aut/", "") #tohle by chtělo upravit aby to nebylo jen na muj laptop lol
 
-        doc = fitz.open(self.filename)
-        png_page_list = []
-        for i, page in enumerate(doc):
-            pix = page.get_pixmap()  # render page to an image
-            for i in doc:
-                another_page = pix.save(f"{self.filename}_page_{i}.png")
-                png_page_list.append(another_page)
+        subprocess.run([f"lilypond", "--png", name_of_file], capture_output=False) #vypadá správně syntakticky
 
-        self.sme.graphicsView.addItem(png_page_list)
+        p = pathlib.Path(self.filename)
+        png_img = str(p.with_suffix(".png"))
+        
+        image = QImage(png_img)
+        item = QGraphicsPixmapItem(
+            QPixmap.fromImage(image))
+        scene = QGraphicsScene()
+        scene.addItem(item)
+        
+        self.sme.graphicsView.setScene(scene)
+
 
     def openFile(self):
         #tohle oficiálně funguje - pdfko ale nezobrazí - to je všechno podle plánu
