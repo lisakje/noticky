@@ -24,7 +24,8 @@ class Sheet():
                 numericke_i = list_of_toniny.index(i)
                 novy_ton = list_of_toniny[numericke_i + 1]
                 new_text = current_text.replace(f"\\transpose c {i}", f"\\transpose c {novy_ton}")
-                break
+                if new_text is not current_text:
+                    break
 
         self.sme.musicEdit.setPlainText(new_text)
 
@@ -42,7 +43,8 @@ class Sheet():
                 numericke_i = list_of_toniny.index(i)
                 novy_ton = list_of_toniny[numericke_i - 1]
                 new_text = current_text.replace(f"\\transpose c {i}", f"\\transpose c {novy_ton}")
-                break
+                if new_text is not current_text:
+                    break
                 
         self.sme.musicEdit.setPlainText(new_text)
 
