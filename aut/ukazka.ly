@@ -5,7 +5,4 @@
 }
 
 \score {
-	\new Staff { }
-	\layout { }
-	\clef bass
-}{ \sharp }{ \sharp } 
+c'} 

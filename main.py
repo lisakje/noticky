@@ -2,12 +2,8 @@ import sys
 import os
 sys.path.append('/home/lida/Downloads/lilypond-2.24.1/python')
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from PyQt5.QtGui import QPixmap
 from PyQt5 import uic
 from ly import *
-import ly.document
-import ly.music
 
 from note_handling import Sheet
 

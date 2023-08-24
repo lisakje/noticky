@@ -1,8 +1,6 @@
 import sys
-#from ly.pitch import transpose
-#from ly.pitch.transpose import ModalTransposer
 import re
-from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsView, QGraphicsPixmapItem
+from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsPixmapItem
 from PyQt5.QtGui import QImage, QPixmap
 import subprocess
 import pathlib
@@ -88,7 +86,7 @@ class Sheet():
         current_text = self.sme.musicEdit.toPlainText()
 
         # Add note to music editor - v pohodě, protože value tý noty potom dostane v argumetu
-        new_text = current_text[:(-4)] + " " + note + current_text[(-4):]
+        new_text = current_text[:(-2)] + " " + note + current_text[(-2):]
 
         self.sme.musicEdit.setPlainText(new_text)
 
@@ -113,11 +111,11 @@ class Sheet():
 
         with open("new_file.ly", "w") as f:
             f.write("\\version \"2.18.2\"\n\n")
-            f.write("\\transpose c c {\n")
-            f.write("\t\\relative {\n")
+            #f.write("\\transpose c c {\n")
+            f.write("notes = \t\\relative {\n")
             f.write("\t\key c \major\n")
-            f.write("\t\clef treble \n")
-            f.write("\t }\n")
+            f.write("\clef treble  \n")
+            #f.write("\t }\n")
             f.write("}\n")
 
         with open("new_file.ly", 'r') as f:
@@ -142,11 +140,17 @@ class Sheet():
         # nějak funguje??? (magicky)
         self.saveFile()
         
-        pp = pathlib.PurePath(self.filename)
-        print(pp.parents[0])
-        
         name_of_file = pathlib.PurePath(self.filename)
+        print(name_of_file.parents[0])
 
+        #stem_of_name = pathlib.PurePath(self.filename).stem
+        #if ".ly" in stem_of_name:
+        #    stem_of_name = pathlib.PurePath(self.filename).stem #bude křičet?
+
+        
+        #if stem_of_name in name_of_file:
+        #    png_img = stem_of_name + ".png"
+        #else:
         subprocess.run([f"lilypond", "--png", name_of_file], capture_output=False)
         p = pathlib.Path(self.filename)
         png_img = str(p.with_suffix(".png"))

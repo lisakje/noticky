@@ -1,8 +1,6 @@
 \version "2.18.2"
 
-\transpose c c {
-	\relative {
+notes = 	\relative {
 	\key c \major
-	\clef treble 
-	 }
+\clef treble  
 }
