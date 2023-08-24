@@ -1,6 +1,4 @@
 import sys
-#from ly.pitch import transpose
-#from ly.pitch.transpose import ModalTransposer
 import re
 from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsView, QGraphicsPixmapItem
 from PyQt5.QtGui import QImage, QPixmap
@@ -17,38 +15,40 @@ class Sheet():
         current_text = self.sme.musicEdit.toPlainText()
     
         list_of_toniny = ["c  ", "cis", "d  ", "dis", "e  ", "f  ", "fis", "g  ", "gis", "a  ", "ais", "h  "]    
-        k = False
+        
         for i in list_of_toniny:
-            if k:
-                current_text[31:33] = i
-                k=False
+            if i == list_of_toniny[11]:
+                new_text = current_text.replace(f"\\transpose c {i}", f"\\transpose c c")
                 break
-            if current_text[31:33] == i:
-                k = True
-        if k:
-            current_text[31:33] = i
-        current_text[29] = list_of_toniny[i] #puvodni tonina (vzdy c)
+            else:
+                numericke_i = list_of_toniny.index(i)
+                novy_ton = list_of_toniny[numericke_i + 1]
+                new_text = current_text.replace(f"\\transpose c {i}", f"\\transpose c {novy_ton}")
+                break
 
-        self.sme.musicEdit.setPlainText(current_text)
+        self.sme.musicEdit.setPlainText(new_text)
 
-        """with open(self.filename, "r") as f:
-            code = f.read
-            tonina = ModalTransposer.getKeyIndex(code)
-            # operuje s kvintovým kruhem - bacha!
-            new_text = transpose(code, 1)
-            #self.pitch = transpose.transpose_pitch(self.pitch, "1")
-            
-            self.sme.musicEdit.setPlainText(new_text)"""
 
     def transpose_down(self):
-        pass
-        #self.pitch = transpose.transpose(self.pitch, "-1")
+        current_text = self.sme.musicEdit.toPlainText()
+    
+        list_of_toniny = ["c  ", "cis", "d  ", "dis", "e  ", "f  ", "fis", "g  ", "gis", "a  ", "ais", "h  "]    
+        
+        for i in list_of_toniny:
+            if i == list_of_toniny[0]:
+                new_text = current_text.replace(f"\\transpose c {i}", f"\\transpose c h")
+                break
+            else:
+                numericke_i = list_of_toniny.index(i)
+                novy_ton = list_of_toniny[numericke_i - 1]
+                new_text = current_text.replace(f"\\transpose c {i}", f"\\transpose c {novy_ton}")
+                break
+                
+        self.sme.musicEdit.setPlainText(new_text)
 
 
     def add_becko_to_file(self):
         # pridava becko, ale až na konec textu - to je v pohode lol
-        with open(self.filename, "r") as f:
-            code = f.read()
         
         current_text = self.sme.musicEdit.toPlainText()
 
@@ -113,7 +113,7 @@ class Sheet():
 
         with open("new_file.ly", "w") as f:
             f.write("\\version \"2.18.2\"\n\n")
-            f.write("\\transpose c c {\n")
+            f.write("\\transpose c c  {\n")
             f.write("\t\\relative {\n")
             f.write("\t\key c \major\n")
             f.write("\t\clef treble \n")
